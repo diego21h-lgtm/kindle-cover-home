@@ -1,59 +1,73 @@
-# Plano técnico — etapa 2
+# Etapa 2: escolha técnica, evidências e limites
 
-## Portões de compatibilidade antes da GUI
+## Revisão da Etapa 1
 
-1. Executar o roteiro da etapa 1 no B023/4.1.4 e registrar versão real, arquitetura,
-   framebuffer (resolução, bpp, stride e API de atualização), utilitários e dispositivos.
-   Não inferir ABI/libc apenas de `uname`. Conferir ELF/toolchain em ambiente de build
-   e compatibilidade com libc/kernel antigos antes de levar qualquer binário ao Kindle.
-2. Preparar ensaio **separado e explicitamente iniciado** de renderização: binário
-   mínimo para backend legado, limites verificados, branco/preto e retângulo pequeno.
-   Validar refresh completo/parcial, ghosting e recuperação. Não basta escrever pixels:
-   painel E Ink exige atualização compatível. Não começar por ioctls de Paperwhite.
-3. Comparar FBInk compilado para o alvo e backend einkfb mínimo; preferir backend
-   mantido se houver build compatível e obrigações de licença atendidas. Não distribuir
-   FBInk moderno ou bibliotecas dinâmicas até executar no FW 4.1.4. `eips` só serve
-   para ensaio se seus recursos efetivos forem confirmados, não como renderizador
-   de capas presumido. Nenhuma instalação em `/usr` ou no firmware.
-4. Fazer capturador evdev dedicado, de duração limitada, em sessão de teste futura.
-   Identificar nós por capacidades e nomes de `/proc/bus/input/devices`; medir press,
-   release e repetição para cada botão. Confirmar tamanhos de `struct input_event` da
-   ABI ARM; não decodificar com layout do computador. Não usar `EVIOCGRAB` inicialmente.
-5. Resolver convivência com a Home: sem exclusão de entrada, o framework pode reagir
-   às mesmas teclas e repintar a tela. Testar foco e ciclo de vida controlado; se não
-   houver caminho seguro sem modificar firmware/serviço permanente, **não liberar
-   GUI**. Não adotar `stop framework` como pré-requisito. Ensaiar saída voluntária,
-   erro, suspensão/retomada e retorno ao KUAL/Home antes de renderizar a biblioteca.
+`bin/start.sh`, `common.sh`, `catalog-entry.sh`, `diagnose.sh` e `demo.tsv` permanecem
+byte a byte como na 0.1.0. O menu passa pelo wrapper `launch.sh`, que registra modo,
+início, diagnóstico e conclusão em `/mnt/us/coverhome/logs/session.log`. Os caminhos
+e formatos antigos continuam disponíveis. O diagnóstico standalone original ainda
+escreve stdout; o comando KUAL novo garante o log no destino solicitado.
 
-## Layout e dados após aprovação dos portões
+Revisão: scripts POSIX `sh`, sem bash arrays, Python/Node no alvo, scripts chamados
+via `sh`, dados USB com caminhos entre aspas, TSV escapado, `find -exec` sem `eval`,
+sem alterações de firmware, serviços ou partições. Sintaxe e execução foram testadas
+com `/bin/sh` do computador, **não com o BusyBox do Kindle**. A opção `cd --` e as
+variantes dos utilitários ainda precisam passar pelo teste real. Sem isso, a
+integração KUAL não está validada.
 
-Canvas 600 × 800 em retrato; margens 12 px; cabeçalho 44 px; rodapé 28 px;
-conteúdo y=56..760 (704 px). Duas colunas de 282 px, separadas por 12 px.
-Três linhas de 226 px com intervalos de 12 px, deixando 2 px de folga inferior.
-Dentro de cada célula: caixa de capa proporcional, título em até duas linhas e
-borda forte para seleção. Esses números são proposta, não imagem já validada.
-Testar legibilidade real, contraste e ghosting sem depender de cor ou touchscreen.
+## Evidência para renderização
 
-Primeiro renderizar placeholders numerados a partir de `demo.tsv`, sem abrir livros.
-Direcionais movem seleção; centro confirma; paginação troca seis entradas; Back sai.
-Definir limites em página incompleta e repetição; Home deve continuar oferecendo
-retorno seguro. Confirmar os códigos no aparelho antes de fixar mapeamentos.
+A [pesquisa da Etapa 1](compatibility.md) identifica 0x23 como K4b/legado no FBInk e
+backend `framebuffer_einkfb` no KOReader. Framebuffer direto exigiria ABI/ioctls e
+política de refresh corretas; escrita isolada pode disputar tela com o framework.
+Não foi escolhido sem esse ensaio. FBInk é alternativa promissora, mas não há binário
+incluído: compatibilidade de compilação/ABI no 4.1.4 não foi provada. KDK/Kindlet
+poderia fornecer foco/ciclo de vida mais adequado, mas exigiria SDK e validação de
+assinatura/permissões. Não se pressupõe runtime HTML.
 
-Depois, gerar capas no computador ou com extrator compatível, fora de `documents`:
-cache dedicado na área de dados, escala com preservação de proporção e tons de cinza,
-limites de tamanho/memória, placeholder para erro. Não contornar DRM. Metadados reais
-podem ser extraídos de documentos sem proteção com parser delimitado e testado;
-separar título inferido de título confirmado, e associação de capa de mero candidato.
-Ordenação e paginação precisam ser determinísticas nesta próxima etapa.
+O [README do FBInk](https://github.com/NiLuJe/FBInk/blob/master/README.md) menciona
+`eips` como ferramenta nativa Kindle; sua [documentação CLI](https://github.com/NiLuJe/FBInk/blob/master/CLI.md)
+refere atualização de imagem pelo eips. Isso sustenta investigar `eips`, mas **não
+prova o suporte `-g PNG` deste firmware**. O módulo escolhe esse mecanismo como
+candidato mínimo, só após verificação local do executável `/usr/sbin/eips`, ajuda
+e observação real. Não há evidência obtida do aparelho nesta entrega.
 
-## Abertura de livros: portão independente
+O executável real recebe uma imagem PNG grayscale pré-gerada. Não é uma simulação
+HTML; o caminho está implementado em shell e não depende de bibliotecas modernas
+no Kindle. Até confirmação real, descrevemos como **ensaio gráfico executável,
+compatibilidade pendente**, não como biblioteca operacional. Não tentamos obter
+controle da tela, limpar framebuffer, pausar framework, chamar IPC ou travar input.
+KUAL/Amazon podem repintar imediatamente: se isso impedir uso, a abordagem falha
+para GUI interativa e o próximo trabalho deve resolver foco/ciclo de vida por uma
+API comprovada antes de adicionar funcionalidades.
 
-Não confundir renderizar capa com abrir o leitor Amazon. Investigar interfaces 4.x
-com documentação e inventário somente leitura, depois testar um documento de teste
-criado para isso, nunca um livro pessoal como primeira experiência. Validar paths
-com espaços/Unicode, URI se aplicável, retorno, estado de leitura e ausência de
-alterações indesejadas. Não montar comandos shell concatenando caminhos do catálogo.
-Se a interface nativa não for comprovada, manter confirmação indisponível e acesso
-normal pela Home; não apresentar abertura como funcional. Medir memória/latência
-com seis capas e livro grande. Encerrar todos os descritores/processos ao sair,
-sem daemon, alteração de init ou substituição da Home.
+## Separação dos módulos
+
+- `tools/library_model.py`: entrada do catálogo legado; dados nunca viram código.
+- `tools/covers.py`: sidecars e EPUB sem DRM no PC; conversão para grayscale.
+- `tools/render_library.py`: páginas PNG 600 × 800, grade 2 × 3, placeholder, título,
+  seleção e vazio. Sem rede. Fonte DejaVu com licença em `tools/fonts`.
+- `bin/navigation.awk`: redutor de estado testável; não conhece hardware.
+- `bin/library.sh`: sessão KUAL curta, bloqueio e seleção de PNG por índices limitados.
+- `bin/render.sh`: única invocação gráfica; saída desativada até marcador explícito.
+
+A biblioteca pessoal é um snapshot preparado no PC do catálogo read-only. Mudar
+livros/capas exige nova preparação; não há atualização dinâmica das imagens no
+Kindle. Caminhos da capa são remapeados apenas dentro da unidade indicada; EPUB
+usa membros ZIP em memória com limite de 4 MiB por item e limite de pixels na
+imagem. Não se extrai ZIP para `documents`. MOBI/AZW usam somente sidecars. Não
+há parser EXTH nem tentativa de ler documentos protegidos.
+
+## Botões e abertura
+
+Os códigos candidatos do mapa K4 estão documentados em `compatibility.md`. Não foi
+possível demonstrar captura segura e foco exclusivo sem aparelho. Portanto não há
+leitura de `/dev/input/event*`, `EVIOCGRAB` ou processo em background. Direções,
+páginas, seleção e saída são ações **do menu KUAL**; o redutor fica disponível para
+um futuro adaptador. Paginação lateral direta e direcional sobre a imagem permanecem
+pendentes. Um comando de seleção registra índice e não abre nada; nenhum comando
+interno não validado é emitido para o leitor original.
+
+O plano original anterior à implementação foi preservado em
+[stage-2-original-plan.md](stage-2-original-plan.md). A próxima decisão depende dos
+resultados do [roteiro real](device-validation-0.2.md), não de expandir a GUI na nuvem.

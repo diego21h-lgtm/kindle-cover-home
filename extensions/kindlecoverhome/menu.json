@@ -3,12 +3,76 @@
     {
       "name": "Iniciar Kindle Cover Home",
       "priority": 0,
-      "action": "sh bin/start.sh"
+      "action": "sh bin/launch.sh scan"
     },
     {
       "name": "Gerar catalogo de demonstracao (6 livros)",
       "priority": 1,
-      "action": "sh bin/start.sh demo"
+      "action": "sh bin/launch.sh demo"
+    },
+    {
+      "name": "Diagnostico 0.2 (coverhome/logs)",
+      "action": "sh bin/launch.sh diagnose"
+    },
+    {
+      "name": "Biblioteca visual 0.2 - experimental",
+      "items": [
+        {
+          "name": "Mostrar demonstracao (requer habilitacao)",
+          "action": "sh bin/library.sh demo",
+          "exitmenu": false
+        },
+        {
+          "name": "Mostrar catalogo preparado no PC",
+          "action": "sh bin/library.sh catalog",
+          "exitmenu": false
+        },
+        {
+          "name": "Cima",
+          "action": "sh bin/library.sh up",
+          "exitmenu": false
+        },
+        {
+          "name": "Baixo",
+          "action": "sh bin/library.sh down",
+          "exitmenu": false
+        },
+        {
+          "name": "Esquerda",
+          "action": "sh bin/library.sh left",
+          "exitmenu": false
+        },
+        {
+          "name": "Direita",
+          "action": "sh bin/library.sh right",
+          "exitmenu": false
+        },
+        {
+          "name": "Proxima pagina",
+          "action": "sh bin/library.sh next",
+          "exitmenu": false
+        },
+        {
+          "name": "Pagina anterior",
+          "action": "sh bin/library.sh previous",
+          "exitmenu": false
+        },
+        {
+          "name": "Selecionar (nao abre livro)",
+          "action": "sh bin/library.sh select",
+          "exitmenu": false
+        },
+        {
+          "name": "Exibir novamente",
+          "action": "sh bin/library.sh show",
+          "exitmenu": false
+        },
+        {
+          "name": "Encerrar sessao / retornar ao KUAL",
+          "action": "sh bin/library.sh back",
+          "exitmenu": false
+        }
+      ]
     }
   ]
 }
