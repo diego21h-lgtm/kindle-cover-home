@@ -3,74 +3,109 @@
     {
       "name": "Iniciar Kindle Cover Home",
       "priority": 0,
-      "action": "sh bin/launch.sh scan"
+      "action": "/bin/sh",
+      "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh launch scan",
+      "exitmenu": false
     },
     {
       "name": "Gerar catalogo de demonstracao (6 livros)",
       "priority": 1,
-      "action": "sh bin/launch.sh demo"
+      "action": "/bin/sh",
+      "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh launch demo",
+      "exitmenu": false
     },
     {
-      "name": "Diagnostico 0.2 (coverhome/logs)",
-      "action": "sh bin/launch.sh diagnose"
+      "name": "Teste 0 - acionamento direto KUAL",
+      "action": "/bin/sh",
+      "params": "-c 'printf \"%s\\n\" \"KUAL_DISPATCH_0.2.1\" > /mnt/us/coverhome-kual-dispatch.txt'",
+      "exitmenu": false
+    },
+    {
+      "name": "Teste basico KUAL",
+      "action": "/bin/sh",
+      "params": "/mnt/us/extensions/kindlecoverhome/bin/kual-basic.sh",
+      "exitmenu": false
+    },
+    {
+      "name": "Teste progressivo - caminhos e logs",
+      "action": "/bin/sh",
+      "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh probe diagnose",
+      "exitmenu": false
+    },
+    {
+      "name": "Diagnostico 0.2.1 (com rastreamento)",
+      "action": "/bin/sh",
+      "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh launch diagnose",
+      "exitmenu": false
     },
     {
       "name": "Biblioteca visual 0.2 - experimental",
       "items": [
         {
           "name": "Mostrar demonstracao (requer habilitacao)",
-          "action": "sh bin/library.sh demo",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library demo"
         },
         {
           "name": "Mostrar catalogo preparado no PC",
-          "action": "sh bin/library.sh catalog",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library catalog"
         },
         {
           "name": "Cima",
-          "action": "sh bin/library.sh up",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library up"
         },
         {
           "name": "Baixo",
-          "action": "sh bin/library.sh down",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library down"
         },
         {
           "name": "Esquerda",
-          "action": "sh bin/library.sh left",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library left"
         },
         {
           "name": "Direita",
-          "action": "sh bin/library.sh right",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library right"
         },
         {
           "name": "Proxima pagina",
-          "action": "sh bin/library.sh next",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library next"
         },
         {
           "name": "Pagina anterior",
-          "action": "sh bin/library.sh previous",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library previous"
         },
         {
           "name": "Selecionar (nao abre livro)",
-          "action": "sh bin/library.sh select",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library select"
         },
         {
           "name": "Exibir novamente",
-          "action": "sh bin/library.sh show",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library show"
         },
         {
           "name": "Encerrar sessao / retornar ao KUAL",
-          "action": "sh bin/library.sh back",
-          "exitmenu": false
+          "action": "/bin/sh",
+          "exitmenu": false,
+          "params": "/mnt/us/extensions/kindlecoverhome/bin/bootstrap.sh library back"
         }
       ]
     }

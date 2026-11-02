@@ -1,134 +1,127 @@
-# Kindle Cover Home 0.2.0 — biblioteca visual experimental
+# Kindle Cover Home 0.2.1 — pacote único de teste no B023
 
-Alvo: Kindle Basic 2012 **B023 / firmware 4.1.4**, jailbreak e KUAL-KDK existentes.
-A implementação da Etapa 1 foi preservada: scanner, diagnóstico, bloqueio e catálogo
-continuam iguais; o menu os chama por um novo wrapper para registrar execução.
-Veja o [README original](docs/stage-1-README.md).
+Esta entrega corrige o acionamento da extensão e inclui **um aplicativo Kindlet
+compilado e assinado**, com desenho e controles próprios, sem usar eips ou framebuffer
+direto. A GUI é executada no Kindle; não depende de gerar PNG no computador.
 
-**Não testado em Kindle real.** Esta versão inclui imagens executáveis por uma
-ferramenta nativa candidata (`eips -g`), com ativação manual. Não oferece uma GUI
-interativa independente validada. O sistema Amazon continua ativo e pode repintar
-a tela imediatamente. Se isso ocorrer, a abordagem não passou pelo portão de
-compatibilidade: não parar o framework nem capturar botões para contornar o problema.
+**Ainda não testado no B023/4.1.4.** Não confundir compilação, assinatura verificada
+e testes de desktop com funcionamento real. Também não está pronto o lançamento
+direto do aplicativo pelo KUAL nem a abertura de livros pelo leitor Amazon.
+Essas integrações não usam comandos internos presumidos.
 
-![Prévia de desenvolvimento, não captura do Kindle](docs/preview-0.2.0.png)
+## Instalação Windows (atualizar 0.2.0)
 
-## O que está implementado
-
-- Payload KUAL 0.2.0 e ZIP USB em `dist/kindle-cover-home-0.2.0.zip`.
-- Etapa 1 intacta; diagnóstico, início e conclusão registrados em
-  `/mnt/us/coverhome/logs/session.log`, com uma execução anterior em `previous.log`.
-  O diagnóstico legado continua em `/mnt/us/kindle-cover-home-data/diagnostics.txt`.
-- Renderizador no **computador**, PNG grayscale 600 × 800, seis células, título,
-  seleção, páginas e estado vazio; seis capas fictícias já incluídas no ZIP.
-- Catálogo (`tools/library_model.py`), capas (`tools/covers.py`), renderização
-  (`tools/render_library.py`), navegação (`bin/navigation.awk`) e saída (`bin/render.sh`)
-  separados. O redutor de navegação também roda via awk no Kindle.
-- Controles oferecidos como comandos do **menu KUAL**, operados por seus botões
-  físicos. Nenhum leitor evdev ou captura global; não há processo aguardando teclas.
-- Capas externas de MOBI/AZW e extração EPUB no computador quando informado um
-  catálogo com EPUB. Arquivos de livros só são lidos; nenhum banco Amazon é aberto.
-- Abertura de livros indisponível: selecionar apenas registra o índice no log.
-
-## Instalar ou atualizar 0.1.0 pelo Windows
-
-1. No GitHub, use a branch **development**. Baixe o arquivo ZIP em `dist/` usando
-   **Download raw file**. Extraia-o no computador; não use o ZIP do código como
-   se já fosse o payload instalado.
-2. Conecte o Kindle por USB e identifique `X:`, a unidade que contém `documents`.
-3. Se houver `X:\extensions\kindlecoverhome`, copie-a para backup **no PC** e
-   remova só essa pasta da unidade. Preserve `kindle-cover-home-data`, `documents`,
-   KUAL e todas as outras extensões. Não deixe backup de extensão em `extensions`,
-   pois o KUAL pode listar menus duplicados. Não mescle versões.
+1. Baixe `dist/kindle-cover-home-0.2.1.zip` da branch `development` e extraia no PC.
+2. Conecte o Kindle. Aqui `X:` é a unidade que contém `documents`.
+3. Faça backup **no PC** de `X:\extensions\kindlecoverhome` e remova somente essa
+   pasta da unidade. Preserve livros, KUAL, outras extensões e dados antigos.
 4. Copie `extensions\kindlecoverhome` do pacote para
-   `X:\extensions\kindlecoverhome`. A estrutura final contém `config.xml`,
-   `menu.json`, `bin` e `ui`. Não copie `tools` para o Kindle.
-5. Ejete com segurança e desconecte. Abra o KUAL e execute
-   **Diagnostico 0.2 (coverhome/logs)**. Reabra a unidade e confira
-   `X:\coverhome\logs\session.log`: deve ter versão 0.2.0, `mode=diagnose`,
-   dados coletados e `completed mode=diagnose`. Só a existência de um log antigo
-   não comprova a execução. Consulte data e modo; o relógio do Kindle pode estar errado.
-6. Teste **Iniciar Kindle Cover Home** e o catálogo demonstrativo da Etapa 1.
-   Compare as saídas com a versão anterior e confirme que a Home e os livros originais
-   continuam funcionais. Isso ainda precisa ser feito no aparelho.
+   `X:\extensions\kindlecoverhome` (sem mesclar versões).
+5. Copie **somente** `documents\KindleCoverHome-0.2.1.azw2` do pacote para
+   `X:\documents\KindleCoverHome-0.2.1.azw2`. Se já existir, faça backup antes.
+   Não substitua o KUAL. Não é necessário copiar `tools`, `kindlet` ou `tests`.
+6. Ejete com segurança. Abra o KUAL e siga os três testes rápidos abaixo.
+   Reabra o KUAL ou recarregue o menu se continuar vendo rótulos antigos.
 
-Os scripts são LF/UTF-8 sem BOM e são chamados por `sh`; não requerem `chmod` em
-FAT. Python, Pillow e Node **não são necessários no Kindle**.
+Não instalar certificados, firmware, SSH, Python ou Node no aparelho. O AZW2 usa as
+chaves públicas de desenvolvimento do fonte atual do KUAL; o aparelho pode ter um
+conjunto diferente. Se houver rejeição de assinatura/autorização, registre a mensagem
+e não altere as chaves do dispositivo para forçar a execução.
 
-## Executar o primeiro ensaio gráfico
+## Teste KUAL: arquivos exatos para verificar
 
-Primeiro siga o [roteiro real](docs/device-validation-0.2.md). O modo visual fica
-bloqueado por padrão: a existência de `eips` não confirma suporte a PNG nem convivência
-com KUAL. A ajuda local e o teste de desenho precisam ser observados no B023.
+Antes de cada ensaio, copie os resultados anteriores para o PC ou renomeie-os por
+USB, para não interpretar um arquivo antigo como execução nova. Espere a ação terminar
+antes de conectar USB; não importa se o KUAL ficou aberto ou voltou à Home.
 
-Após verificar no aparelho que `/usr/sbin/eips` oferece `-g` para PNG e aceitar o
-ensaio de uma imagem única, crie um arquivo vazio **sem extensão**:
-`X:\coverhome\enable-eips`. Em PowerShell no Windows:
+| Comando no KUAL | Verificar na unidade USB | Evidência esperada |
+| --- | --- | --- |
+| Teste 0 - acionamento direto KUAL | `X:\coverhome-kual-dispatch.txt` | `KUAL_DISPATCH_0.2.1` |
+| Teste basico KUAL | `X:\coverhome-kual-test.txt` | `BASIC_SCRIPT_ENTERED` e `BASIC_SCRIPT_COMPLETED` |
+| Teste progressivo - caminhos e logs | `X:\coverhome-bootstrap.log` e `X:\coverhome\logs\bootstrap-probe.txt` | `PROBE_COMPLETED`, `BOOTSTRAP_EXIT=0` e `LOG_WRITE_OK` |
+| Iniciar Kindle Cover Home | `X:\coverhome-bootstrap.log`, `X:\coverhome\logs\session.log`, `X:\kindle-cover-home-data\catalog.tsv` | `CHILD_EXIT=0`, `BOOTSTRAP_EXIT=0`, `completed mode=scan` e catálogo |
+| Gerar catálogo de demonstração | mesmos logs e `X:\kindle-cover-home-data\demo.tsv` | `completed mode=demo` e seis entradas fictícias |
+| Diagnostico 0.2.1 | mesmos logs | `completed mode=diagnose`, kernel, ferramentas e entrada |
 
-```powershell
-New-Item -ItemType File -Path 'X:\coverhome\enable-eips'
-```
+Os rótulos antigos sem acentos de alguns itens foram mantidos no menu por compatibilidade.
+Se algum teste falhar, veja a [tabela de diagnóstico](docs/kual-0.2.1.md). O primeiro
+comando não precisa sequer da pasta `bin`; o segundo depende só de seu arquivo shell.
+Não é necessário SSH para nenhum desses testes.
 
-Troque `X:` pela unidade correta; não habilite sem verificar o mecanismo. Se não
-houver como verificar a ajuda local, permaneça no diagnóstico e compartilhe esse
-bloqueio antes de avançar. Em um shell já disponível no dispositivo, consulte a ajuda
-local (`/usr/sbin/eips -h`) e registre a saída; não instale SSH ou ferramentas extras
-como pré-requisito desta versão.
+## Testar o aplicativo visual no Kindle
 
-Ejete, abra **Biblioteca visual 0.2 - experimental → Mostrar demonstracao**.
-O comando efetivo é `/usr/sbin/eips -g CAMINHO_DA_IMAGEM`. Não chama `-c`, não
-escreve diretamente no framebuffer, não suspende o framework nem abre eventos.
-Verifique visualmente se as seis capas aparecem e permanecem legíveis. O retorno
-zero do comando não prova o resultado visual. Se a tela for repintada, registre a
-falha e desative o ensaio; não é uma biblioteca utilizável ainda.
+Depois de executar Iniciar pelo KUAL para atualizar o catálogo, pressione Home e
+abra **Kindle Cover Home** na biblioteca Amazon (o AZW2 novo). **Este passo pela Home
+é manual**: não foi encontrada uma API pública comprovada para um atalho KUAL → Kindlet.
+O comando Iniciar do menu continua sendo o scanner legado, não é um lançador da GUI.
 
-Use os itens Cima/Baixo/Esquerda/Direita e próxima/anterior no menu KUAL para mudar
-estado e emitir outra imagem. O foco permanece sob controle do KUAL: **não é o mesmo
-que pressionar direcional sobre uma grade com foco próprio**. Se a imagem ocultar
-o menu, não navegue às cegas: use Back/Home para recuperar a tela Amazon e encerre
-o ensaio. Escolha **Encerrar sessao / retornar ao KUAL** para apagar estado; depois
-Back no KUAL volta ao menu anterior. Não há serviço a encerrar. Remova o marcador
-`enable-eips` por USB para desativar a saída gráfica.
+O Kindlet tenta habilitar, pelo mecanismo MKK já usado pelo KUAL, permissões **desta
+aplicação** para ler `documents`, ler o catálogo e escrever seu log. Não pede
+AllPermission, não instala nem modifica o MKK, não toca no firmware e não captura evdev.
+Se não conseguir, a tela informa a falta de acesso. Use Menu → Demonstracao para testar
+o desenho e os botões independentemente da leitura dos livros.
 
-## Biblioteca pessoal e capas — preparação no computador
+A tela possui grade 2 × 3, seis capas por página, título/autor, seleção e rodapé.
+Adapta-se à área útil fornecida pelo framework; barras Amazon podem reduzir os
+600 × 800 físicos. Direcional move seleção, centro confirma apenas a seleção,
+laterais trocam página. Voltar **não é consumido** e Home permanece com o framework.
+Menu oferece demonstração e recarregamento de catálogo. Não há daemon nem processo
+nativo sobrevivendo ao encerramento.
 
-A demonstração já está pronta. Para livros reais, gere o catálogo pela Etapa 1 e
-conecte por USB. No computador com Python 3.10+ (testado com 3.12):
+Capas reais: sidecars JPG/PNG e leitura limitada de MOBI/AZW/PRC/AZW3 compatíveis com
+PalmDB + cabeçalho MOBI/EXTH, **sem DRM**. Lê autor, título e imagem indicada pelo
+EXTH; falhas usam nome de arquivo e placeholder. Converte imagens para grayscale
+no próprio aplicativo. EPUB/PDF têm sidecars/placeholder no Kindlet; a extração
+EPUB do PC continua preservada, mas não é requisito para esta experiência.
 
-```powershell
-py -m pip install -r tools/requirements-dev.txt
-py tools/render_library.py X:\kindle-cover-home-data\catalog.tsv prepared-library --usb-root X:\
-```
+Usa o TSV da Etapa 1 quando disponível, validando caminhos dentro de `documents`;
+na ausência do TSV faz varredura local somente leitura. Para atualizar uma lista
+existente, execute o scanner KUAL novamente e recarregue o catálogo no Kindlet.
+Limite de 600 livros e seis imagens em memória; capa comprimida até 1 MiB e até
+1.048.576 pixels decodificados, reduzidos para ate 180 × 230 por capa em cache. Inicialização e troca de página podem demorar no
+hardware antigo; não há medição real ainda. Sem rede ou alteração dos livros.
 
-Execute na raiz do código extraído. `prepared-library` deve ser uma pasta nova;
-para reconstruir use outro nome e depois substitua a pasta preparada. Com o Kindle
-conectado e nenhum comando executando, copie o **conteúdo** dessa pasta para
-`X:\coverhome\library`, substituindo uma biblioteca preparada anterior somente
-após backup. Ejete e use **Mostrar catalogo preparado no PC**. Não mistura dados
-fictícios e reais. Catálogo sem livros gera uma tela vazia. O limite é 600 entradas;
-existem até seis PNG por página (um por seleção), com custo proporcional em USB.
+## Validação objetiva e limites
 
-A geração remapeia apenas `/mnt/us/` para a unidade informada. As capas candidatas
-fora dessa unidade são rejeitadas. Usa sidecars associados pelo scanner e placeholder
-se não houver capa. Não extrai imagens internas de MOBI/AZW nem contorna DRM.
-O scanner original não lista EPUB; o módulo de capas aceita EPUB de catálogo
-compatível fornecido à parte, com `format=epub`, e procura OPF cover-image/cover id.
-Não há descoberta automática de EPUB nesta versão. O leitor Amazon 4.1.4 não passa a
-suportar EPUB por causa disso. Os títulos continuam inferidos e autores desconhecidos.
+1. Confirmar que o AZW2 abre, sem erro de assinatura ou permissão. Se não abrir,
+   anotar mensagem exata; o pacote não deve ser chamado operacional nesse aparelho.
+2. Menu → Demonstracao: conferir seis células, seleção, direcionais e paginação
+   com biblioteca pessoal de sete ou mais livros. Com somente seis livros não há
+   segunda página. Confirmar Back/Home sem navegação residual na Home.
+3. Recarregar catálogo: comparar livros e capas reais com a Home original; confirmar
+   que arquivo sem capa aparece com placeholder e nenhum livro foi modificado.
+4. Centro: a seleção é exibida, **não abre livro**. Abra normalmente pela Home;
+   voltar ao novo Kindlet pela Home é manual. Não há integração automática de retorno.
+5. Suspender/retomar, sair e reabrir. Confirmar que a Home e o leitor original
+   continuam funcionando. Se não, interromper o teste e remover somente o protótipo.
 
-## Remover ou reverter
+Log nativo preferido: `X:\coverhome\logs\kindlet.log`, após preparar logs pelo KUAL.
+Se indisponível, procure `coverhome-kindlet.log` dentro da pasta de dados da aplicação
+sob `X:\developer`; o caminho exato é fornecido pelo KDK e aparece no próprio log.
+Registra CREATE/START/STOP/DESTROY, permissões e códigos de teclas recebidos **apenas
+em foco**. Limite aproximado de 64 KiB. Não registra o conteúdo de livros. Ausência
+desse log pode significar que a aplicação nem foi autorizada a iniciar.
 
-Feche o KUAL, conecte por USB e apague somente `extensions\kindlecoverhome`.
-Opcionalmente apague `coverhome` (logs, marcador, estado e páginas preparadas) e
-`kindle-cover-home-data` (saídas da Etapa 1), após backup. Preserve `documents`.
-Para voltar à 0.1.0, copie o payload do ZIP antigo após remover o novo; os dois ZIPs
-ficam em `dist/`. A Home não foi substituída e não requer restauração de firmware.
+## Remoção / reversão
 
-Linux/macOS/WSL: `sh tools/install.sh /raiz/USB` recusa instalação existente;
-`sh tools/uninstall.sh /raiz/USB` remove arquivos conhecidos, preservando dados e
-arquivos extras. Nenhum script é necessário para a instalação manual pelo Explorer.
+Feche o aplicativo, conecte USB e remova apenas:
 
-## Testar no computador
+- `X:\documents\KindleCoverHome-0.2.1.azw2` (o aplicativo novo, não seus livros);
+- `X:\extensions\kindlecoverhome` (extensão deste projeto).
+
+Opcionalmente faça backup e remova `coverhome`, `kindle-cover-home-data`,
+`coverhome-bootstrap.log`, `coverhome-kual-dispatch.txt`, `coverhome-kual-test.txt`
+e os dados privados deste Kindlet em `developer`. Não apague toda a pasta developer.
+Restaure a extensão 0.2.0 do backup se desejar. Nenhuma partição ou Home foi alterada.
+O script `tools/uninstall.sh` continua removendo só a extensão; o AZW2 novo deve ser
+removido manualmente. Isso evita que o script apague documentos.
+
+## Código, testes e versões preservadas
+
+A Etapa 1 e a interface PNG 0.2.0 foram preservadas. A GUI PNG continua desativada por
+padrão; **não habilite eips para este ensaio**. O aplicativo novo não usa essa saída.
+Veja [README anterior](docs/README-0.2.0.md), [pesquisa KUAL](docs/kual-0.2.1.md) e
+[build Kindlet](kindlet/README.md). Código novo em `kindlet/src/coverhome`.
 
 ```sh
 python3 -m pip install -r tools/requirements-dev.txt
@@ -136,8 +129,8 @@ python3 -m unittest discover -s tests -v
 python3 tools/package.py
 ```
 
-Testados catálogo, preservação dos livros, instalação/remoção, logs, escape TSV,
-bloqueio gráfico, navegação sem acesso a evdev, páginas/vazio e descoberta de capas.
-Pillow e a fonte DejaVu distribuída com sua licença são ferramentas **do computador**.
-A prévia é uma imagem gerada; nenhum teste em nuvem valida refresh, foco, botões,
-KUAL-KDK ou firmware real. Veja [pesquisa e limites](docs/stage-2.md).
+A suite testa scripts legados, ações a partir de diretório arbitrário, falhas
+progressivas, catálogo, capa MOBI sintética sem DRM, navegação e desenho Java.
+O teste Java usa o JDK do **computador**; o dispositivo já tem o runtime de Kindlets.
+A assinatura foi verificada contra o keystore público de referência, não contra as
+chaves instaladas no seu aparelho. Os testes não certificam B023/4.1.4.

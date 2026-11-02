@@ -16,4 +16,4 @@ if [ -f "$STATE/logs/session.log" ]; then
     mv -f "$STATE/logs/session.log" "$STATE/logs/previous.log"
 fi
 exec >> "$STATE/logs/session.log" 2>&1
-printf '\nKindle Cover Home 0.2.0 UTC: '; date -u
+printf '\nKindle Cover Home 0.2.1 UTC: '; date -u
